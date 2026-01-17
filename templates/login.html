@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Chat - Login</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <h1 class="auth-title">Open Chat</h1>
+
+      {% if error %}
+      <div class="error-message">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="/">
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            required
+            placeholder="Enter your username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            required
+            placeholder="Enter your password"
+          />
+        </div>
+
+
+        <button type="submit" class="btn btn-primary" style="margin-bottom: 1rem;">Enter Chat</button>
+        
+        <a href="{{ url_for('register') }}" class="btn btn-secondary" style="display: block; text-decoration: none;">Create Account</a>
+      </form>
+    </div>
+  </body>
+</html>

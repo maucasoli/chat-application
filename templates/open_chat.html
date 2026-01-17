@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body style="background-image: url('{{ url_for('static', filename='images/background1.png') }}'); background-size: cover; background-position: center;">
+    
+    <div class="container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="header-title">Open Chat</div>
+                <div class="header-actions">
+                    <span>Logged in as <strong>{{ username }}</strong></span>
+                    <a href="{{ url_for('modify') }}"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+
+            <div class="messages-area" id="messages">
+                <!-- Messages will appear here -->
+            </div>
+
+            <div class="input-area">
+                <button class="upload-btn" id="upload-btn" title="Upload File">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="file" id="file-input" style="display: none;">
+                
+                <textarea id="message-input" class="input-field" placeholder="Type a message..." rows="1"></textarea>
+                
+                <button class="send-btn" id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const currentUser = "{{ username }}";
+        const messagesDiv = document.getElementById("messages");
+        const messageInput = document.getElementById("message-input");
+        const sendBtn = document.getElementById("send-btn");
+        const uploadBtn = document.getElementById("upload-btn");
+        const fileInput = document.getElementById("file-input");
+
+        // Helper: Scroll to bottom
+        function scrollToBottom() {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Helper: Render Linkify (basic)
+        function linkify(text) {
+            // Check for file pattern [FILE] url
+            // Original app sent: [FILE] url
+            // We should detect urls and make them clickable
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                // If it's an image, maybe show preview? For now, just link
+                // If it ends with image ext, show image
+                if (url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                    return `<br><a href="${url}" target="_blank"><img src="${url}" style="max-width: 200px; border-radius: 8px; margin-top: 5px;"></a>`;
+                }
+                return `<a href="${url}" target="_blank" style="color: var(--accent-color);">${url}</a>`;
+            });
+        }
+
+        socket.on("connect", () => {
+            console.log("Connected to server");
+        });
+
+        socket.on("message", function(data) {
+            // data is {username, content, timestamp}
+            const msgDiv = document.createElement("div");
+            
+            let type = "other";
+            if (data.username === currentUser) {
+                type = "self";
+            } else if (data.username === "GPT") {
+                type = "gpt";
+            } else if (data.username === "System") {
+                type = "other"; // or system class
+            }
+
+            msgDiv.classList.add("message", type);
+            
+            const metaDiv = document.createElement("span");
+            metaDiv.classList.add("message-meta");
+            metaDiv.textContent = data.username;
+            
+            const contentDiv = document.createElement("div");
+            // Check for [FILE] prefix just in case legacy or raw text usage
+            let text = data.content;
+            
+            // Basic XSS protection needed if we use innerHTML
+            // But linkify needs HTML. We should escape HTML first then linkify.
+            // For this project, assuming trust or basic escape.
+            // Let's implement basic escape.
+            const escapeHtml = (unsafe) => {
+                return unsafe
+                     .replace(/&/g, "&amp;")
+                     .replace(/</g, "&lt;")
+                     .replace(/>/g, "&gt;")
+                     .replace(/"/g, "&quot;")
+                     .replace(/'/g, "&#039;");
+            }
+
+            // Note: If content is [FILE] we want the link not to be escaped heavily or we parse it specifically.
+            // But simpler: just escape everything then linkify.
+            
+            // Special handling for [FILE] legacy from file upload
+            // Original app sent: send(msg) where msg was whatever user typed or [FILE] url
+            // If user typed [FILE] ...
+            
+            // If data.content starts with [FILE] (we might not use that prefix in new logic but let's see upload logic)
+            
+            contentDiv.innerHTML = linkify(escapeHtml(text));
+
+            const timeDiv = document.createElement("span");
+            timeDiv.classList.add("message-time");
+            timeDiv.textContent = data.timestamp;
+
+            msgDiv.appendChild(metaDiv);
+            msgDiv.appendChild(contentDiv);
+            msgDiv.appendChild(timeDiv);
+
+            messagesDiv.appendChild(msgDiv);
+            scrollToBottom();
+        });
+
+        // Send Message
+        function sendMessage() {
+            const msg = messageInput.value.trim();
+            if (msg) {
+                socket.send(msg); // This triggers @socketio.on("message")
+                messageInput.value = "";
+            }
+            messageInput.focus();
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // File Upload
+        uploadBtn.addEventListener("click", () => fileInput.click());
+
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Send message with file URL
+                    // Construct absolute URL or relative?
+                    // data.url from server is `/uploads/filename`
+                    const msg = `[FILE] ${window.location.protocol}//${window.location.host}${data.url}`;
+                    socket.send(msg);
+                } else {
+                    alert("Upload failed: " + data.error);
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Upload error.");
+            });
+            
+            fileInput.value = ""; // Reset
+        });
+
+    </script>
+</body>
+</html>
