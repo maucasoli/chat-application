@@ -2,6 +2,8 @@
 
 A modern, secure, and real-time chat application built with Python (Flask) and WebSockets (Socket.IO).
 
+![Chat page](https://github.com/maucasoli/chat-application/blob/main/docs/chat.png "Chat page")
+
 ## 🚀 Features
 
 - **Real-time Messaging**: Instant communication using WebSockets.
