@@ -25,9 +25,7 @@ def init_db():
             )
         """)
         
-        # We need to ensure the users table exists. 
-        # Note: If migration is needed for existing users to new hash, it would go here.
-        # For now, we assume a fresh start or compatible schema (columns are same)
+        # Ensure the users table exists
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,12 +59,7 @@ def check_user(username, password):
         result = cursor.fetchone()
 
     if result:
-        stored_hash = result['password'] # row_factory allows item access
-        # If stored_hash is string (from old db), we might need to encode. 
-        # But bcrypt stores bytes normally. Sqlite stores BLOB or TEXT. 
-        # If we stored as TEXT, it might be a hex string or raw bytes depending on how we inserted.
-        # In this updated save_user, we insert bytes (hashed_password). Sqlite will store as BLOB if not forced.
-        # Actually proper way: store as text (decode to utf-8)
+        stored_hash = result['password']
         
         if isinstance(stored_hash, str):
             stored_hash = stored_hash.encode('utf-8')

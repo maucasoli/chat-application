@@ -5,11 +5,9 @@ A modern, secure, and real-time chat application built with Python (Flask) and W
 ## 🚀 Features
 
 - **Real-time Messaging**: Instant communication using WebSockets.
-- **Modern UI**: Sleek Glassmorphism design with a responsive layout.
 - **Security**: bcrypt password hashing and secure session management.
 - **File Sharing**: Upload and share images and files directly in the chat.
 - **User Management**: Registration, Login, and Password Change functionality.
-- **Link Preview**: Automatic detection and preview of links and images.
 
 ## 🛠️ Technologies
 
@@ -82,9 +80,3 @@ open-chat/
 │   └── modify.html     # User settings page
 └── uploads/            # Directory for uploaded files
 ```
-
-## 🛡️ Security Notes
-
-- This application uses `bcrypt` for hashing passwords.
-- Input sanitization is implemented to prevent XSS.
-- SQL parameters are used to prevent injection attacks.

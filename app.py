@@ -104,7 +104,7 @@ def modify():
         return redirect(url_for("index"))
 
     if request.method == "POST":
-        username = session["username"] # Use session username for security
+        username = session["username"] # Use session username
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
 

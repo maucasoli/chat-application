@@ -21,7 +21,8 @@
 
 body {
   font-family: "Inter", sans-serif;
-  background-color: var(--bg-color);
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   display: flex;
@@ -64,6 +65,7 @@ body {
     var(--accent-color)
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -307,6 +309,39 @@ body {
 .send-btn:hover {
   transform: scale(1.05);
   background: var(--primary-hover);
+}
+
+/* File Attachments */
+.file-attachment {
+  margin-top: 0.5rem;
+}
+
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.file-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.image-preview {
+  max-width: 250px;
+  max-height: 250px;
+  border-radius: 8px;
+  margin-top: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
 }
 
 /* Scrollbar */
