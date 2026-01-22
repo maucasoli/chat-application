@@ -22,7 +22,7 @@ A modern, secure, and real-time chat application built with Python (Flask) and W
 1.  **Clone the repository**
 
     ```bash
-    git clone https://github.com/yourusername/open-chat.git
+    git clone https://github.com/maucasoli/open-chat.git
     cd open-chat
     ```
 
