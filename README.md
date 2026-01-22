@@ -23,7 +23,7 @@ A modern, secure, and real-time chat application built with Python (Flask) and W
 
     ```bash
     git clone https://github.com/maucasoli/chat-application.git
-    cd open-chat
+    cd chat-application
     ```
 
 2.  **Create a virtual environment (Recommended)**
